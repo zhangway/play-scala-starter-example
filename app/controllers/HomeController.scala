@@ -74,12 +74,21 @@ class HomeController @Inject()(
     }).toList
 
 
+
+
     val fishes = nodes.map(_.fish)
     Logger.debug(s"original fish count:${fishes.size}")
 
     val uniqueFishes = fishes.distinct
 
     Logger.debug(s"distinct fish count:${uniqueFishes.size}")
+
+    val edges = uniqueFishes.flatMap(fish => {
+      val mappings = nodes.filter(node => node.fish.equals(fish)).distinct
+      mappings
+      //mappings.foreach(l => Logger.logger.debug(s"edge: ${l.fish} -- ${l.lice}"))
+
+    })
 
     val lice = nodes.map(_.lice)
 
@@ -97,7 +106,7 @@ class HomeController @Inject()(
   }
 
 
-  def cyto = Action { implicit request =>
+  def cyto2 = Action { implicit request =>
 
 
 
@@ -138,6 +147,60 @@ class HomeController @Inject()(
     Logger.logger.debug(s"response:${response}")
 
 
+    Ok(response)
+  }
+
+  def cyto = Action { implicit  request =>
+    val lines = Source.fromFile("globalNetwk.txt").getLines().drop(1)
+
+    val nodes = lines.map ( line => {
+      val items = line.split("\\s+")
+      val fish = items(0)
+      val lice = items(1)
+      val bicor = items(2)
+      InitNode(fish, lice, bicor)
+    }).toList
+
+    val fishes = nodes.map(_.fish)
+    Logger.debug(s"original fish count:${fishes.size}")
+
+    val uniqueFishes = fishes.distinct
+
+    Logger.debug(s"distinct fish count:${uniqueFishes.size}")
+
+    val edges = uniqueFishes.flatMap(fish => {
+      val mappings = nodes.filter(node => node.fish.equals(fish)).distinct
+      mappings
+      //mappings.foreach(l => Logger.logger.debug(s"edge: ${l.fish} -- ${l.lice}"))
+
+    })
+
+    val lice = nodes.map(_.lice)
+
+    val uniqueLice = lice.distinct
+
+    Logger.debug(s"original lice count:${lice.size}, distinct lice count:${uniqueLice.size}")
+
+
+    val cyNodes = (uniqueFishes ::: uniqueLice).map(s => Node(s, s))
+
+    Logger.logger.debug(s"nodes count:${cyNodes.size}")
+
+    val cyEdges = edges.map(edge => {
+      Edge(edge.fish+edge.lice, edge.fish, edge.lice)
+    })
+
+    val nodesJson = cyNodes.map(node => {
+      Json.obj("data" -> Json.toJson(node))
+    })
+
+    val edgesJson = cyEdges.map(edge => {
+      Json.obj("data" -> Json.toJson(edge))
+    })
+    val response = Json.obj(
+      "nodes" -> nodesJson,
+      "edges" -> edgesJson
+    )
     Ok(response)
   }
 
