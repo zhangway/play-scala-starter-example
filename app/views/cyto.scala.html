@@ -26,10 +26,12 @@
 							{
 								selector: 'node',
 								style: {
-									'label': 'data(label)',
+									'label': 'data(id)',
+									'shape': 'hexagon',
 									'width': '60px',
 									'height': '60px',
 									'color': 'blue',
+									'background-color': 'red',
 									'background-fit': 'contain',
 									'background-clip': 'none'
 								}
@@ -38,7 +40,7 @@
 								style: {
 									'text-background-color': 'yellow',
 									'text-background-opacity': 0.4,
-									'width': '6px',
+									'width': '6',
 									'target-arrow-shape': 'triangle',
 									'control-point-step-size': '140px'
 								}
@@ -46,16 +48,7 @@
 						],
 						layout: {
 							name: 'circle'
-						},
-						style: [
-							{
-								selector: 'node',
-								style: {
-									shape: 'hexagon',
-									'background-color': 'red',
-									label: 'data(id)'
-								}
-							}]
+						}
 					});
 				});
 			});
