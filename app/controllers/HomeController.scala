@@ -26,7 +26,8 @@ case class Node(
 case class Edge(
   id: String,
   source: String,
-  target: String
+  target: String,
+  bicor: Double
 )
 
 
@@ -51,7 +52,8 @@ class HomeController @Inject()(
   implicit val edgeWrites: Writes[Edge] =
     ((JsPath \ "id").write[String] and
       (JsPath \ "source").write[String] and
-      (JsPath \ "target").write[String]) (unlift(Edge.unapply))
+      (JsPath \ "target").write[String] and
+      (JsPath \ "bicor").write[Double]) (unlift(Edge.unapply))
 
   /**
    * Create an Action to render an HTML page with a welcome message.
@@ -121,11 +123,11 @@ class HomeController @Inject()(
     val nodes = Seq(a, b, c, d, e, f)
 
     val edges = Seq(
-      Edge("ab", "a", "b"),
-      Edge("cd", "c", "d"),
-      Edge("ef", "e", "f"),
-      Edge("ac", "a", "c"),
-      Edge("be", "b", "e")
+      Edge("ab", "a", "b", 10),
+      Edge("cd", "c", "d", 20),
+      Edge("ef", "e", "f", 5),
+      Edge("ac", "a", "c", 50),
+      Edge("be", "b", "e", 44)
     )
 
     val nodesJson = nodes.map(node => {
@@ -181,13 +183,18 @@ class HomeController @Inject()(
 
     Logger.debug(s"original lice count:${lice.size}, distinct lice count:${uniqueLice.size}")
 
+    val maximum = nodes.map(_.bicor.toDouble).max
+    val minimum = nodes.map(_.bicor.toDouble).min
+
+    Logger.logger.debug(s"maximum:$maximum, min:$minimum")
 
     val cyNodes = (uniqueFishes ::: uniqueLice).map(s => Node(s, s))
 
     Logger.logger.debug(s"nodes count:${cyNodes.size}")
 
     val cyEdges = edges.map(edge => {
-      Edge(edge.fish+edge.lice, edge.fish, edge.lice)
+
+      Edge(edge.fish+edge.lice, edge.fish, edge.lice, edge.bicor.toDouble)
     })
 
     val nodesJson = cyNodes.map(node => {
